@@ -34,7 +34,11 @@ class Cano{
 
 class Player{
     constructor (){
-        this.pos_x = 0
+        this.w = 140
+
+        this.h = 95
+
+        this.pos_x = SCREEN_WIDTH/2 - this.w/2
         this.pos_y = 0
         this.vx = 0
         this.vy = 1
@@ -42,10 +46,6 @@ class Player{
         this.image = document.getElementById("source");
 
         this.score = 0
-
-        this.w = 140
-
-        this.h = 95
 
         this.total_x = ()=>{return this.w}
         this.total_y = ()=>{return this.h}
