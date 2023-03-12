@@ -217,7 +217,8 @@ if (screen.getContext){
 }
 
 ctx.font = "bold 48px Arial";
-ctx.fillText("Para iniciar aperte qualquer botão", 50, 90);
+ctx.fillText("Para iniciar aperte qualquer botão.", 50, 90);
+ctx.fillText("Controle o pássaro com WASD", 50, 180);
 
 document.addEventListener('keypress', game_init)
 
