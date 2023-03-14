@@ -11,19 +11,30 @@ class Cano{
 
         this.color = "rgb(0, 255, 0)"
 
+        this.uimage = document.getElementById("up_pipe");
+        this.dimage = document.getElementById("down_pipe");
+
+        this.w = 191
+        this.h = 2000
+
         this.vx = 6
     }
 
     draw(ctx){
-        ctx.fillStyle = this.color
-        ctx.fillRect(this.x, 0, this.length, this.y)
+        
+        //ctx.fillStyle = this.color
+        //ctx.fillRect(this.x, 0, this.w, this.y)
 
-        ctx.fillRect(this.x, this.y+this.gap, this.length, SCREEN_HEIGHT-(this.y+this.gap))
+        ctx.drawImage(this.dimage, this.x, this.y-this.h, this.w, this.h)
+
+        //ctx.fillRect(this.x, this.y+this.gap, this.length, SCREEN_HEIGHT-(this.y+this.gap))
+
+        ctx.drawImage(this.uimage, this.x, this.y+this.gap, this.w, this.h)
     }
 
     update_pos(){
         this.x -= this.vx
-        if (this.x+this.length < 0){
+        if (this.x+this.w < 0){
             this.x = SCREEN_WIDTH
             this.y = Math.random() * (SCREEN_HEIGHT-this.gap)
             this.passed = false
@@ -31,6 +42,51 @@ class Cano{
     }
 }
 
+
+class Button {
+    constructor(pos_x, pos_y, width, height, color, darker_color, text){
+        this.x = pos_x
+        this.y = pos_y
+        this.w = width
+        this.h = height
+
+        this.text = text
+        this.color = color
+        this.dcolor = darker_color
+
+        this.state = "none" // over/none
+
+        this.rad = 40
+
+        this.action = ()=>{}
+    }
+
+    draw(ctx){
+        ctx.fillStyle = this.state== "none" ? this.color : this.dcolor
+
+        ctx.beginPath();
+
+        ctx.roundRect(this.x, this.y, this.w, this.h, this.rad)
+
+        ctx.fill()
+
+        ctx.closePath()
+
+        ctx.fillStyle = "rgb(0, 0, 0)"
+
+        ctx.fillText(this.text, this.x+this.w/10, this.y+this.h/1.9, this.w/10*8)
+    }
+
+    collide(x, y){
+        if (x >= this.x && x <= this.x+this.w){
+            if (y >= this.y && y <= this.y+this.h){
+                return true
+            }
+        }
+
+        return false
+    }
+}
 
 class Player{
     constructor (){
@@ -118,7 +174,7 @@ class Player{
     }
 
     test_passed(cano){
-        if (this.pos_x > (cano.x + cano.length) && !cano.passed){
+        if (this.pos_x > (cano.x + cano.w) && !cano.passed){
             this.score ++
             cano.passed =  true
             console.log(this.score)
@@ -179,12 +235,44 @@ class Keys{
 
 }
 
+function  getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect(), // abs. size of element
+      scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for x
+      scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for y
+  
+    return {
+      x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
+      y: (evt.clientY - rect.top) * scaleY     // been adjusted to be relative to element
+    }
+}
+
+function mouse_move_handler(event){
+    for (let i=0; i<ALL_BUTTONS.length; i++){
+        let pos = getMousePos(screen, event)
+        if(ALL_BUTTONS[i].collide(pos.x, pos.y)){
+            ALL_BUTTONS[i].state = "over"
+        }else{
+            ALL_BUTTONS[i].state = "none"
+        }
+    }
+}
+
+function mouse_click_handler(event){
+    for (let i=0; i<ALL_BUTTONS.length; i++){
+        let pos = getMousePos(screen, event)
+        if(ALL_BUTTONS[i].collide(pos.x, pos.y)){
+            ALL_BUTTONS[i].action()
+        }
+    }
+}
+
+
 GRAVITY = 1.7
+
+ALL_BUTTONS = []
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
-
-var screen = document.getElementById("screen")
 
 var player = new Player()
 
@@ -212,17 +300,39 @@ document.addEventListener('keyup', function(event){
     }
 })
 
+var screen = document.getElementById("screen")
+
 if (screen.getContext){
     var ctx = screen.getContext('2d');
 }
 
 ctx.font = "bold 48px Arial";
-ctx.fillText("Para iniciar aperte qualquer botão.", 50, 90);
-ctx.fillText("Controle o pássaro com WASD", 50, 180);
+
+init_button = new Button(100, 100, 1000, 200, "rgb(255, 255, 0)", "rgb(200, 200, 0)", "Para iniciar aperte qualquer botão.")
+
+init_button.action = game_init
+
+ALL_BUTTONS[0] = init_button
+
+screen.addEventListener("mousemove", mouse_move_handler)
+
+screen.addEventListener("click", mouse_click_handler)
+
+//ctx.fillText("Controle o pássaro com WASD", 50, 180);
 
 document.addEventListener('keypress', game_init)
 
+init_window = setInterval(
+    function(){
+        ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+        init_button.draw(ctx)
+    }, 20)
+
+
+
+
 function game_init(){
+    clearInterval(init_window)
     setInterval(game_loop, 20)
 
     ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)

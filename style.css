@@ -5,12 +5,12 @@ body{
 .container{
     width: 100%;
     height: 100%;
+    text-align: center;
 }
 
 #screen{
     background-image: url("back.png");
-    width: 1000px;
-    height: 500px;
+    width: 80%;
     background-size: cover;
     border-radius: 20px;
 }
