@@ -135,13 +135,13 @@ class Player{
 
     update_vel(){
         this.vy += GRAVITY
-        if (keys.letters['w']){
+        if (STATE.up){
             this.vy = -15
         }
-        if (keys.letters['d']){
+        if (STATE.right){
             this.vx = 5
         }
-        if (keys.letters['a']){
+        if (STATE.left){
             this.vx = -5
         }
         this.vx *= 0.96
@@ -224,17 +224,6 @@ class Player{
     }
 }
 
-class Keys{
-    constructor(letters){
-        this.letters = {}
-
-        for (let i=0; i < letters.length; i++){
-            this.letters[letters[i]] = false
-        }
-    }
-
-}
-
 function  getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect(), // abs. size of element
       scaleX = canvas.width / rect.width,    // relationship bitmap vs. element for x
@@ -262,8 +251,15 @@ function mouse_click_handler(event){
         let pos = getMousePos(screen, event)
         if(ALL_BUTTONS[i].collide(pos.x, pos.y)){
             ALL_BUTTONS[i].action()
+            return
         }
     }
+
+    STATE[mouse.clicked] = true
+}
+
+function mouse_unclick_handler(event){
+    STATE[mouse.clicked] = false
 }
 
 
@@ -284,19 +280,21 @@ for (let i=0; i<3; i++){
 
 
 
-var keys = new Keys(['w', 'a', 's', 'd'])
+var keys = {w: 'up', a: 'left', s: 'down', d: 'right'}
 
-console.log(keys.letters)
+var mouse = {clicked: 'up'}
+
+var STATE = {up: false, left: false, right: false}
 
 document.addEventListener('keydown', function(event){
-    if (event.key in keys.letters){
-        keys.letters[event.key] = true
+    if (event.key in keys){
+        STATE[keys[event.key]] = true
     }
 })
 
 document.addEventListener('keyup', function(event){
-    if (event.key in keys.letters){
-        keys.letters[event.key] = false
+    if (event.key in keys){
+        STATE[keys[event.key]] = false
     }
 })
 
@@ -316,7 +314,9 @@ ALL_BUTTONS[0] = init_button
 
 screen.addEventListener("mousemove", mouse_move_handler)
 
-screen.addEventListener("click", mouse_click_handler)
+screen.addEventListener("mousedown", mouse_click_handler)
+
+screen.addEventListener("mouseup", mouse_unclick_handler)
 
 //ctx.fillText("Controle o pássaro com WASD", 50, 180);
 
