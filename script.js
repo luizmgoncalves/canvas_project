@@ -1,6 +1,6 @@
 class Cano{
     constructor(pos_x){
-        this.gap = 300
+        this.gap = 270
 
         this.x = pos_x
         this.y = Math.random() * (SCREEN_HEIGHT-this.gap)
@@ -90,9 +90,9 @@ class Button {
 
 class Player{
     constructor (){
-        this.w = 140
+        this.w = 120
 
-        this.h = 95
+        this.h = 80
 
         this.pos_x = SCREEN_WIDTH/2 - this.w/2
         this.pos_y = 0
@@ -212,7 +212,9 @@ class Player{
         v2 = this.pos_y + this.h
 
         if (v1 <= cano.y || v2 >= (cano.y + cano.gap)){
-            cano.color = "rgb(255, 0, 0)"
+
+            clearInterval(GAME_RUNNING)
+
             this.score = 0
             cano.passed = true
             return true
@@ -314,13 +316,18 @@ ALL_BUTTONS[0] = init_button
 
 screen.addEventListener("mousemove", mouse_move_handler)
 
-screen.addEventListener("mousedown", mouse_click_handler)
 
+document.addEventListener("touchstart", mouse_click_handler)
+document.addEventListener("touchcancel", mouse_unclick_handler)
+
+screen.addEventListener("mousedown", mouse_click_handler)
 screen.addEventListener("mouseup", mouse_unclick_handler)
 
 //ctx.fillText("Controle o pássaro com WASD", 50, 180);
 
 document.addEventListener('keypress', game_init)
+
+var GAME_RUNNING = undefined
 
 init_window = setInterval(
     function(){
@@ -333,9 +340,7 @@ init_window = setInterval(
 
 function game_init(){
     clearInterval(init_window)
-    setInterval(game_loop, 20)
-
-    ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    GAME_RUNNING = setInterval(game_loop, 20)
 
     document.removeEventListener('keypress', game_init)
 }
